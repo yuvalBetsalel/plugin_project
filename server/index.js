@@ -41,6 +41,11 @@ const originalRender = app.response.render;
 app.response.render = function(view, options = {}, callback) {
   const self = this;
 
+  // Skip layout for layout itself to prevent infinite recursion
+  if (view === 'layout') {
+    return originalRender.call(this, view, options, callback);
+  }
+
   // Render the view to get its content
   originalRender.call(this, view, options, (err, html) => {
     if (err) return callback ? callback(err) : self.req.next(err);
