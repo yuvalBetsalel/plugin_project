@@ -1,0 +1,67 @@
+<%
+  const title = 'Dashboard';
+  const authenticated = true;
+%>
+
+<h2>Security Scans Dashboard</h2>
+<p style="color: #666; margin-bottom: 20px;">
+  Showing <%= scans.length %> scan<%= scans.length !== 1 ? 's' : '' %>
+</p>
+
+<% if (scans.length === 0) { %>
+  <div class="empty-state">
+    <p style="font-size: 18px; margin-bottom: 10px;">No scans yet</p>
+    <p>Scans will appear here when the plugin submits security findings to the server.</p>
+  </div>
+<% } else { %>
+  <table>
+    <thead>
+      <tr>
+        <th>Scan ID</th>
+        <th>Timestamp</th>
+        <th>Project Name</th>
+        <th>Total Findings</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% scans.forEach(scan => { %>
+        <tr>
+          <td><code>#<%= scan.id %></code></td>
+          <td><%= new Date(scan.timestamp).toLocaleString() %></td>
+          <td><strong><%= scan.project_name || 'Unknown' %></strong></td>
+          <td>
+            <% if (scan.total_findings === 0) { %>
+              <span class="badge badge-gray"><%= scan.total_findings %></span>
+            <% } else if (scan.total_findings < 5) { %>
+              <span class="badge badge-yellow"><%= scan.total_findings %></span>
+            <% } else { %>
+              <span class="badge badge-red"><%= scan.total_findings %></span>
+            <% } %>
+          </td>
+          <td>
+            <a href="/admin/scan/<%= scan.id %>" class="btn" style="padding: 6px 12px; font-size: 12px;">
+              View Details
+            </a>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <% if (totalPages > 1) { %>
+    <div class="pagination">
+      <% if (hasPrevPage) { %>
+        <a href="/admin?page=<%= currentPage - 1 %>" class="btn btn-secondary">← Previous</a>
+      <% } %>
+
+      <span style="padding: 10px; color: #666;">
+        Page <%= currentPage %> of <%= totalPages %>
+      </span>
+
+      <% if (hasNextPage) { %>
+        <a href="/admin?page=<%= currentPage + 1 %>" class="btn btn-secondary">Next →</a>
+      <% } %>
+    </div>
+  <% } %>
+<% } %>
