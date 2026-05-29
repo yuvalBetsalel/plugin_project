@@ -90,7 +90,9 @@ export async function analyze(projectPath) {
 }
 
 // CLI entry point
-if (import.meta.url === `file://${process.argv[1]}`) {
+import { fileURLToPath } from 'node:url';
+if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}` ||
+    fileURLToPath(import.meta.url) === process.argv[1]) {
   const projectPath = process.argv[2] || '.';
 
   try {
