@@ -57,6 +57,23 @@
           <strong style="text-transform: capitalize;"><%= finding.finding_type %></strong> detected
           <span style="float: right; color: #666;"><code><%= finding.file_path %></code></span>
         </div>
+
+        <% if (finding.secret_lines && finding.secret_lines.length > 0) { %>
+          <div style="background: #fff3cd; padding: 12px; border-bottom: 1px solid #fcc;">
+            <strong>🔍 Secret locations found:</strong>
+            <ul style="margin: 8px 0 0 20px; padding: 0;">
+              <% finding.secret_lines.forEach(secretLine => { %>
+                <li style="margin: 4px 0;">
+                  <strong>Line <%= secretLine.lineNumber %>:</strong>
+                  <code style="background: #fff; padding: 2px 6px; border: 1px solid #ddd; border-radius: 3px;">
+                    <%= secretLine.lineContent %>
+                  </code>
+                </li>
+              <% }); %>
+            </ul>
+          </div>
+        <% } %>
+
         <div style="position: relative;">
           <pre style="margin: 0; max-height: 400px; overflow-y: auto;" class="<%= getLanguageClass(finding.file_path) %>"><code><%- truncateContent(finding.file_content) %></code></pre>
         </div>

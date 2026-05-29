@@ -18,6 +18,7 @@ export const SCHEMA = {
       file_path TEXT NOT NULL,
       file_content TEXT NOT NULL,
       complexity_score INTEGER,
+      secret_lines TEXT,
       FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE
     )
   `,

@@ -57,7 +57,8 @@ export function createSubmitRouter(db) {
           findingType: finding.type,
           filePath: finding.filePath,
           fileContent: finding.fileContent,
-          complexityScore: finding.complexityScore || null
+          complexityScore: finding.complexityScore || null,
+          secretLines: finding.secretLines || null
         });
       }
 

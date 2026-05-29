@@ -24,23 +24,57 @@ const SENSITIVE_FILES = [
 function checkForSecrets(content, filePath) {
   const findings = [];
   const fileName = filePath.split(/[/\\]/).pop();
+  const lines = content.split('\n');
 
   // Check if it's a sensitive config file
   if (SENSITIVE_FILES.includes(fileName)) {
-    // Check if it contains any actual sensitive data
-    for (const { type, pattern } of SECRET_PATTERNS) {
-      if (pattern.test(content)) {
-        findings.push({ type: 'config', filePath, fileContent: content });
-        break; // Only add once per file
+    // Check if it contains any actual sensitive data and find the lines
+    const secretLines = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      for (const { type, pattern } of SECRET_PATTERNS) {
+        pattern.lastIndex = 0; // Reset regex
+        if (pattern.test(lines[i])) {
+          secretLines.push({
+            lineNumber: i + 1, // 1-indexed
+            lineContent: lines[i].trim()
+          });
+        }
       }
+    }
+
+    if (secretLines.length > 0) {
+      findings.push({
+        type: 'config',
+        filePath,
+        fileContent: content,
+        secretLines
+      });
     }
   }
 
-  // Check for hardcoded secrets
+  // Check for hardcoded secrets line by line
   for (const { type, pattern } of SECRET_PATTERNS) {
-    pattern.lastIndex = 0; // Reset regex
-    if (pattern.test(content)) {
-      findings.push({ type, filePath, fileContent: content });
+    const secretLines = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      pattern.lastIndex = 0; // Reset regex
+      const match = pattern.exec(lines[i]);
+      if (match) {
+        secretLines.push({
+          lineNumber: i + 1, // 1-indexed
+          lineContent: lines[i].trim()
+        });
+      }
+    }
+
+    if (secretLines.length > 0) {
+      findings.push({
+        type,
+        filePath,
+        fileContent: content,
+        secretLines
+      });
       break; // Only add once per file per type
     }
   }

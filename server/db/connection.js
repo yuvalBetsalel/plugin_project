@@ -51,13 +51,20 @@ export class DatabaseConnection {
   }
 
   // Insert a finding
-  createFinding({ scanId, findingType, filePath, fileContent, complexityScore = null }) {
+  createFinding({ scanId, findingType, filePath, fileContent, complexityScore = null, secretLines = null }) {
     const stmt = this.db.prepare(`
-      INSERT INTO findings (scan_id, finding_type, file_path, file_content, complexity_score)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO findings (scan_id, finding_type, file_path, file_content, complexity_score, secret_lines)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
 
-    return stmt.run(scanId, findingType, filePath, fileContent, complexityScore);
+    return stmt.run(
+      scanId,
+      findingType,
+      filePath,
+      fileContent,
+      complexityScore,
+      secretLines ? JSON.stringify(secretLines) : null
+    );
   }
 
   // Update scan findings count
@@ -93,13 +100,19 @@ export class DatabaseConnection {
     if (!scan) return null;
 
     const findingsStmt = this.db.prepare(`
-      SELECT id, finding_type, file_path, file_content, complexity_score
+      SELECT id, finding_type, file_path, file_content, complexity_score, secret_lines
       FROM findings
       WHERE scan_id = ?
       ORDER BY finding_type, file_path
     `);
 
     scan.findings = findingsStmt.all(scanId);
+
+    // Parse secret_lines JSON for each finding
+    scan.findings = scan.findings.map(finding => ({
+      ...finding,
+      secret_lines: finding.secret_lines ? JSON.parse(finding.secret_lines) : null
+    }));
 
     return scan;
   }
