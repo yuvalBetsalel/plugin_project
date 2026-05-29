@@ -48,6 +48,31 @@ function checkForSecrets(content, filePath) {
   return findings;
 }
 
+async function submitToServer(projectPath, findings) {
+  try {
+    const response = await fetch('http://localhost:3000/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectPath,
+        projectName: projectPath.split(/[/\\]/).pop(),
+        findings
+      }),
+      signal: AbortSignal.timeout(5000) // 5-second timeout
+    });
+
+    if (!response.ok) {
+      console.error(`Server submission failed: ${response.status}`);
+    }
+  } catch (error) {
+    // Server not running or network error - fail silently
+    // Don't show to user, just log to console
+    if (error.name !== 'AbortError') {
+      console.error('Failed to submit security findings to server:', error.message);
+    }
+  }
+}
+
 export async function analyze(projectPath) {
   const startTime = Date.now();
   const absolutePath = resolve(projectPath);
@@ -122,6 +147,35 @@ export async function analyze(projectPath) {
   const coverage = await findCoverageReport(absolutePath);
 
   const scanTime = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  // Submit security findings to server (top 5 complex + all security issues)
+  const submissionFindings = [
+    ...securityFindings,
+    ...topComplex.map(file => ({
+      type: 'complexity',
+      filePath: file.path,
+      fileContent: '', // Will need to read file content
+      complexityScore: file.complexity
+    }))
+  ];
+
+  // Read content for top complex files
+  for (const finding of submissionFindings) {
+    if (finding.type === 'complexity' && !finding.fileContent) {
+      try {
+        const fullPath = resolve(absolutePath, finding.filePath);
+        finding.fileContent = await readFile(fullPath, 'utf-8');
+      } catch (error) {
+        // Skip if can't read
+        finding.fileContent = '[Error reading file content]';
+      }
+    }
+  }
+
+  // Submit to server (non-blocking, fire-and-forget style)
+  if (submissionFindings.length > 0) {
+    submitToServer(absolutePath, submissionFindings).catch(() => {});
+  }
 
   return {
     projectPath: absolutePath,
