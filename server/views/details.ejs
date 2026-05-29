@@ -1,0 +1,100 @@
+<%
+  const title = 'Scan Details';
+  const authenticated = true;
+
+  // Helper to detect language from file extension
+  function getLanguageClass(filePath) {
+    const ext = filePath.split('.').pop().toLowerCase();
+    const langMap = {
+      'js': 'javascript', 'jsx': 'javascript', 'ts': 'typescript', 'tsx': 'typescript',
+      'py': 'python', 'java': 'java', 'go': 'go', 'rb': 'ruby', 'rs': 'rust',
+      'c': 'c', 'cpp': 'cpp', 'h': 'c', 'hpp': 'cpp', 'php': 'php',
+      'json': 'json', 'xml': 'xml', 'html': 'html', 'css': 'css'
+    };
+    return langMap[ext] || 'plaintext';
+  }
+
+  // Helper to truncate large content
+  function truncateContent(content, maxLength = 50000) {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + '\n\n... [Content truncated - file too large for display]';
+  }
+%>
+
+<div style="margin-bottom: 20px;">
+  <a href="/admin" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
+  <h2 style="margin-bottom: 15px;">Scan #<%= scan.id %></h2>
+  <p><strong>Project:</strong> <%= scan.project_name || 'Unknown' %></p>
+  <p><strong>Path:</strong> <code><%= scan.project_path %></code></p>
+  <p><strong>Timestamp:</strong> <%= new Date(scan.timestamp).toLocaleString() %></p>
+  <p><strong>Total Findings:</strong>
+    <% if (scan.total_findings === 0) { %>
+      <span class="badge badge-gray"><%= scan.total_findings %></span>
+    <% } else if (scan.total_findings < 5) { %>
+      <span class="badge badge-yellow"><%= scan.total_findings %></span>
+    <% } else { %>
+      <span class="badge badge-red"><%= scan.total_findings %></span>
+    <% } %>
+  </p>
+</div>
+
+<% if (scan.total_findings === 0) { %>
+  <div class="empty-state">
+    <p style="font-size: 18px; margin-bottom: 10px;">✓ No security issues found</p>
+    <p>This scan did not detect any credentials, keys, secrets, or high-complexity files.</p>
+  </div>
+<% } else { %>
+
+  <!-- Security Issues Section -->
+  <% if (securityFindings.length > 0) { %>
+    <h3 style="color: #c00; margin-bottom: 15px;">
+      🚨 Security Issues (<%= securityFindings.length %>)
+    </h3>
+
+    <% securityFindings.forEach((finding, index) => { %>
+      <div style="border: 2px solid #fcc; border-radius: 4px; margin-bottom: 20px; overflow: hidden;">
+        <div style="background: #fee; padding: 12px; border-bottom: 1px solid #fcc;">
+          <strong style="text-transform: capitalize;"><%= finding.finding_type %></strong> detected
+          <span style="float: right; color: #666;"><code><%= finding.file_path %></code></span>
+        </div>
+        <div style="position: relative;">
+          <pre style="margin: 0; max-height: 400px; overflow-y: auto;" class="<%= getLanguageClass(finding.file_path) %>"><code><%- truncateContent(finding.file_content) %></code></pre>
+        </div>
+      </div>
+    <% }); %>
+  <% } %>
+
+  <!-- High Complexity Files Section -->
+  <% if (complexityFindings.length > 0) { %>
+    <h3 style="color: #880; margin-bottom: 15px; margin-top: 40px;">
+      ⚠️ High Complexity Files (<%= complexityFindings.length %>)
+    </h3>
+
+    <% complexityFindings.forEach((finding, index) => { %>
+      <div style="border: 2px solid #ff9; border-radius: 4px; margin-bottom: 20px; overflow: hidden;">
+        <div style="background: #ffc; padding: 12px; border-bottom: 1px solid #ff9;">
+          <strong>Complexity Score: <%= finding.complexity_score %></strong>
+          <span style="float: right; color: #666;"><code><%= finding.file_path %></code></span>
+        </div>
+        <div style="position: relative;">
+          <pre style="margin: 0; max-height: 400px; overflow-y: auto;" class="<%= getLanguageClass(finding.file_path) %>"><code><%- truncateContent(finding.file_content) %></code></pre>
+        </div>
+      </div>
+    <% }); %>
+  <% } %>
+
+<% } %>
+
+<!-- Include highlight.js for syntax highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightElement(block);
+    });
+  });
+</script>
