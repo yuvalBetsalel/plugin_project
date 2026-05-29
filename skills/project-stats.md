@@ -18,7 +18,7 @@ When the user invokes this skill:
 
 Use Bash tool:
 ```bash
-node src/analyzer.js .
+node C:\Users\I765591\.claude\plugins\plugin_project\src\analyzer.js .
 ```
 
 **Step 2: Display results**
