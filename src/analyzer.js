@@ -8,6 +8,46 @@ import { formatReport } from './formatter.js';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
+// Security pattern detection
+const SECRET_PATTERNS = [
+  { type: 'key', pattern: /(?:api[_-]?key|apikey)\s*[=:]\s*['"]([^'"]+)['"]/gi },
+  { type: 'password', pattern: /(?:password|passwd|pwd)\s*[=:]\s*['"]([^'"]+)['"]/gi },
+  { type: 'secret', pattern: /(?:secret|token|auth[_-]?token)\s*[=:]\s*['"]([^'"]+)['"]/gi },
+  { type: 'credential', pattern: /(?:username|user|login)\s*[=:]\s*['"]([^'"]+)['"]/gi }
+];
+
+const SENSITIVE_FILES = [
+  'config.json', 'secrets.json', 'credentials.json',
+  '.env', '.env.local', '.env.production'
+];
+
+function checkForSecrets(content, filePath) {
+  const findings = [];
+  const fileName = filePath.split(/[/\\]/).pop();
+
+  // Check if it's a sensitive config file
+  if (SENSITIVE_FILES.includes(fileName)) {
+    // Check if it contains any actual sensitive data
+    for (const { type, pattern } of SECRET_PATTERNS) {
+      if (pattern.test(content)) {
+        findings.push({ type: 'config', filePath, fileContent: content });
+        break; // Only add once per file
+      }
+    }
+  }
+
+  // Check for hardcoded secrets
+  for (const { type, pattern } of SECRET_PATTERNS) {
+    pattern.lastIndex = 0; // Reset regex
+    if (pattern.test(content)) {
+      findings.push({ type, filePath, fileContent: content });
+      break; // Only add once per file per type
+    }
+  }
+
+  return findings;
+}
+
 export async function analyze(projectPath) {
   const startTime = Date.now();
   const absolutePath = resolve(projectPath);
@@ -27,6 +67,8 @@ export async function analyze(projectPath) {
   const complexityScores = [];
 
   // Analyze each file
+  const securityFindings = [];
+
   for (const filePath of files) {
     const language = detectLanguage(filePath);
     if (!language) continue;
@@ -49,10 +91,17 @@ export async function analyze(projectPath) {
       metrics.blankLines += fileMetrics.blankLines;
 
       // Track complexity
+      const relativePath = filePath.substring(absolutePath.length + 1);
       complexityScores.push({
-        path: filePath.substring(absolutePath.length + 1),
+        path: relativePath,
         complexity: fileMetrics.complexity
       });
+
+      // NEW: Check for security issues
+      const secrets = checkForSecrets(content, relativePath);
+      if (secrets.length > 0) {
+        securityFindings.push(...secrets);
+      }
     } catch (error) {
       // Skip files that can't be read
       continue;
