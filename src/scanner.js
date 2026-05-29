@@ -12,7 +12,10 @@ const DEFAULT_EXCLUDES = [
   '.nuxt',
   'target',
   'bin',
-  'obj'
+  'obj',
+  'venv',
+  '.venv',
+  'AppData'
 ];
 
 const BINARY_EXTENSIONS = [
@@ -75,9 +78,35 @@ async function loadGitignore(rootPath) {
 }
 
 function isIgnored(path, patterns) {
+  // Normalize path separators for consistent matching
+  const normalizedPath = path.replace(/\\/g, '/');
+
   for (const pattern of patterns) {
-    // Simple pattern matching (exact match or contains)
-    if (path === pattern || path.includes(pattern)) {
+    // Handle directory patterns (ending with /)
+    if (pattern.endsWith('/')) {
+      const dirPattern = pattern.slice(0, -1);
+      if (normalizedPath === dirPattern || normalizedPath.startsWith(dirPattern + '/')) {
+        return true;
+      }
+    }
+
+    // Handle wildcard patterns (e.g., *.log, __pycache__)
+    if (pattern.includes('*')) {
+      const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+      const fileName = normalizedPath.split('/').pop();
+      if (regex.test(fileName) || regex.test(normalizedPath)) {
+        return true;
+      }
+    }
+
+    // Handle exact match or contains
+    if (normalizedPath === pattern || normalizedPath.includes(pattern)) {
+      return true;
+    }
+
+    // Handle directory name matching (e.g., "__pycache__" matches "src/__pycache__/file.py")
+    const pathParts = normalizedPath.split('/');
+    if (pathParts.includes(pattern)) {
       return true;
     }
   }

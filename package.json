@@ -5,7 +5,10 @@
   "main": "src/analyzer.js",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/**/*.test.js"
+    "test": "node --test tests/**/*.test.js",
+    "server": "cd server && npm start",
+    "server:dev": "cd server && npm run dev",
+    "server:install": "cd server && npm install"
   },
   "keywords": ["claude-code", "plugin", "analytics", "metrics"],
   "author": "",

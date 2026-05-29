@@ -1,0 +1,14 @@
+{
+  "name": "project-analytics-marketplace",
+  "owner": {
+    "name": "Amit & Yuval"
+  },
+  "description": "Marketplace hosting the project-analytics plugin for Claude Code",
+  "plugins": [
+    {
+      "name": "claude-code-project-analytics",
+      "source": "./",
+      "description": "Analyzes a project's files, line counts, and complexity"
+    }
+  ]
+}
