@@ -7,6 +7,9 @@ export function createAdminRouter(db) {
   // GET /admin/login - show login form
   router.get('/login', redirectIfAuthenticated, (req, res) => {
     res.render('login', {
+      title: 'Login',
+      showHeader: false,
+      authenticated: false,
       error: req.query.error
     });
   });
@@ -55,6 +58,8 @@ export function createAdminRouter(db) {
       const totalPages = Math.ceil(totalScans / limit);
 
       res.render('dashboard', {
+        title: 'Dashboard',
+        authenticated: true,
         scans,
         currentPage: page,
         totalPages,
@@ -92,6 +97,8 @@ export function createAdminRouter(db) {
       ).sort((a, b) => (b.complexity_score || 0) - (a.complexity_score || 0));
 
       res.render('details', {
+        title: 'Scan Details',
+        authenticated: true,
         scan,
         securityFindings,
         complexityFindings
