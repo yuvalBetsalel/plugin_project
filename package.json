@@ -1,0 +1,13 @@
+{
+  "name": "claude-code-project-analytics",
+  "version": "1.0.0",
+  "description": "Claude Code plugin for project analytics and metrics",
+  "main": "src/analyzer.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": ["claude-code", "plugin", "analytics", "metrics"],
+  "author": "",
+  "license": "MIT"
+}
