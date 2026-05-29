@@ -35,15 +35,17 @@ export class DatabaseConnection {
   }
 
   // Insert a new scan and return its ID
-  createScan({ projectPath, projectName, metadata = {} }) {
+  createScan({ projectPath, projectName, clientIp, userAgent, metadata = {} }) {
     const stmt = this.db.prepare(`
-      INSERT INTO scans (project_path, project_name, metadata)
-      VALUES (?, ?, ?)
+      INSERT INTO scans (project_path, project_name, client_ip, user_agent, metadata)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
     const result = stmt.run(
       projectPath,
       projectName,
+      clientIp || null,
+      userAgent || null,
       JSON.stringify(metadata)
     );
 
@@ -79,7 +81,7 @@ export class DatabaseConnection {
   // Get all scans (ordered by timestamp desc)
   getAllScans({ limit = 50, offset = 0 } = {}) {
     const stmt = this.db.prepare(`
-      SELECT id, timestamp, project_path, project_name, total_findings
+      SELECT id, timestamp, project_path, project_name, total_findings, client_ip, user_agent
       FROM scans
       ORDER BY timestamp DESC
       LIMIT ? OFFSET ?
@@ -121,6 +123,20 @@ export class DatabaseConnection {
   getTotalScansCount() {
     const stmt = this.db.prepare('SELECT COUNT(*) as count FROM scans');
     return stmt.get().count;
+  }
+
+  // Delete a single scan (CASCADE will delete associated findings)
+  deleteScan(scanId) {
+    const stmt = this.db.prepare('DELETE FROM scans WHERE id = ?');
+    const result = stmt.run(scanId);
+    return result.changes > 0;
+  }
+
+  // Delete all scans (CASCADE will delete all associated findings)
+  deleteAllScans() {
+    const stmt = this.db.prepare('DELETE FROM scans');
+    const result = stmt.run();
+    return result.changes;
   }
 
   close() {

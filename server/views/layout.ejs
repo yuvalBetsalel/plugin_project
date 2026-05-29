@@ -156,7 +156,186 @@
       border: 1px solid #e0e0e0;
       line-height: 1.4;
     }
+
+    /* Modal styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .modal-icon {
+      font-size: 32px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .modal-body {
+      color: #555;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-actions .btn {
+      min-width: 80px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
+  <script>
+    // Modal utility functions
+    function showModal(options) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+
+        const header = document.createElement('div');
+        header.className = 'modal-header';
+
+        const icon = document.createElement('div');
+        icon.className = 'modal-icon';
+        icon.textContent = options.icon || '❓';
+
+        const title = document.createElement('div');
+        title.className = 'modal-title';
+        title.textContent = options.title || 'Confirm';
+
+        header.appendChild(icon);
+        header.appendChild(title);
+
+        const body = document.createElement('div');
+        body.className = 'modal-body';
+        body.textContent = options.message;
+
+        const actions = document.createElement('div');
+        actions.className = 'modal-actions';
+
+        if (options.type === 'confirm') {
+          const cancelBtn = document.createElement('button');
+          cancelBtn.className = 'btn btn-secondary';
+          cancelBtn.textContent = options.cancelText || 'Cancel';
+          cancelBtn.onclick = () => {
+            overlay.remove();
+            resolve(false);
+          };
+
+          const confirmBtn = document.createElement('button');
+          confirmBtn.className = 'btn ' + (options.danger ? 'btn-danger' : '');
+          confirmBtn.textContent = options.confirmText || 'Confirm';
+          confirmBtn.onclick = () => {
+            overlay.remove();
+            resolve(true);
+          };
+
+          actions.appendChild(cancelBtn);
+          actions.appendChild(confirmBtn);
+        } else {
+          const okBtn = document.createElement('button');
+          okBtn.className = 'btn';
+          okBtn.textContent = 'OK';
+          okBtn.onclick = () => {
+            overlay.remove();
+            resolve(true);
+          };
+
+          actions.appendChild(okBtn);
+        }
+
+        modal.appendChild(header);
+        modal.appendChild(body);
+        modal.appendChild(actions);
+        overlay.appendChild(modal);
+
+        document.body.appendChild(overlay);
+
+        setTimeout(() => overlay.classList.add('show'), 10);
+
+        overlay.onclick = (e) => {
+          if (e.target === overlay) {
+            overlay.remove();
+            resolve(false);
+          }
+        };
+      });
+    }
+
+    function showAlert(message, title = 'Notice', icon = '✓') {
+      return showModal({
+        type: 'alert',
+        icon,
+        title,
+        message
+      });
+    }
+
+    function showConfirm(message, title = 'Confirm', options = {}) {
+      return showModal({
+        type: 'confirm',
+        icon: options.icon || '⚠️',
+        title,
+        message,
+        confirmText: options.confirmText,
+        cancelText: options.cancelText,
+        danger: options.danger
+      });
+    }
+  </script>
 </head>
 <body>
   <% if (typeof showHeader === 'undefined' || showHeader) { %>

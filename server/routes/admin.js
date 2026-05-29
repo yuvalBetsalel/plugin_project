@@ -142,5 +142,38 @@ export function createAdminRouter(db) {
     }
   });
 
+  // DELETE /admin/api/scan/:id - Delete a single scan
+  router.delete('/api/scan/:id', requireAuth, (req, res) => {
+    try {
+      const scanId = parseInt(req.params.id, 10);
+
+      if (isNaN(scanId)) {
+        return res.status(400).json({ error: 'Invalid scan ID' });
+      }
+
+      const deleted = db.deleteScan(scanId);
+
+      if (!deleted) {
+        return res.status(404).json({ error: 'Scan not found' });
+      }
+
+      res.json({ success: true, message: 'Scan deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting scan:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // DELETE /admin/api/scans - Delete all scans
+  router.delete('/api/scans', requireAuth, (req, res) => {
+    try {
+      const deletedCount = db.deleteAllScans();
+      res.json({ success: true, message: `${deletedCount} scan(s) deleted successfully`, count: deletedCount });
+    } catch (error) {
+      console.error('Error deleting all scans:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   return router;
 }

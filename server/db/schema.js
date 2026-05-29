@@ -6,6 +6,8 @@ export const SCHEMA = {
       project_path TEXT NOT NULL,
       project_name TEXT,
       total_findings INTEGER DEFAULT 0,
+      client_ip TEXT,
+      user_agent TEXT,
       metadata TEXT
     )
   `,

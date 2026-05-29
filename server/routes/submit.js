@@ -40,10 +40,22 @@ export function createSubmitRouter(db) {
         }
       }
 
+      // Get client IP and User Agent
+      let clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+      // Clean up IPv4-mapped IPv6 addresses (::ffff:127.0.0.1 -> 127.0.0.1)
+      if (clientIp && clientIp.startsWith('::ffff:')) {
+        clientIp = clientIp.substring(7);
+      }
+
+      const userAgent = req.headers['user-agent'];
+
       // Create scan record
       const scanId = db.createScan({
         projectPath,
         projectName: projectName || projectPath.split(/[/\\]/).pop(),
+        clientIp,
+        userAgent,
         metadata: {
           findingsCount: findings.length,
           receivedAt: new Date().toISOString()
