@@ -11,6 +11,7 @@ export function analyzeFile(content, language) {
   let codeLines = 0;
   let commentLines = 0;
   let blankLines = 0;
+  let complexity = 1; // Base complexity
 
   let inMultiLineComment = false;
   let multiLineEnd = null;
@@ -55,8 +56,9 @@ export function analyzeFile(content, language) {
       continue;
     }
 
-    // Code line
+    // Code line - calculate complexity
     codeLines++;
+    complexity += calculateLineComplexity(line, config.complexityKeywords);
   }
 
   return {
@@ -64,6 +66,27 @@ export function analyzeFile(content, language) {
     codeLines,
     commentLines,
     blankLines,
-    complexity: 0 // Will implement in next task
+    complexity
   };
+}
+
+function calculateLineComplexity(line, keywords) {
+  let count = 0;
+
+  for (const keyword of keywords) {
+    // Use word boundaries for keywords that are words
+    if (/^[a-zA-Z]+$/.test(keyword)) {
+      const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+      const matches = line.match(regex);
+      if (matches) {
+        count += matches.length;
+      }
+    } else {
+      // For operators like &&, ||, ?
+      const matches = line.split(keyword).length - 1;
+      count += matches;
+    }
+  }
+
+  return count;
 }
