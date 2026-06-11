@@ -1,8 +1,13 @@
 # Dependencies
 node_modules/
 
-# Server data
+# Environment files with secrets (NEVER commit these)
 .env
+.env.local
+.env.*.local
+server/.env
+
+# Server data (database and runtime)
 server-data/
 
 # Test artifacts
@@ -11,3 +16,8 @@ cookies.txt
 # Server runtime files
 *.log
 *.pid
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
