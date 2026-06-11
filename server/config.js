@@ -16,8 +16,13 @@ function generateSecret(length = 32) {
   return randomBytes(length).toString('hex');
 }
 
-// Ensure .env file exists and has required keys
+// Ensure .env file exists and has required keys (only for local development)
 function ensureEnvFile() {
+  // Skip in production - use environment variables instead
+  if (process.env.NODE_ENV === 'production') {
+    return;
+  }
+
   const envPath = join(projectRoot, '.env');
 
   if (!existsSync(envPath)) {
@@ -60,12 +65,14 @@ function ensureEnvFile() {
   }
 }
 
-// Ensure server-data directory exists
+// Ensure database directory exists
 function ensureDataDirectory() {
-  const dataDir = join(projectRoot, 'server-data');
+  const dbPath = process.env.DATABASE_PATH || './server-data/security.db';
+  const dataDir = dirname(dbPath);
+
   if (!existsSync(dataDir)) {
     mkdirSync(dataDir, { recursive: true });
-    console.log('✓ Created server-data directory\n');
+    console.log(`✓ Created database directory: ${dataDir}\n`);
   }
 }
 
