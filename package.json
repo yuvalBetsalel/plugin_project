@@ -12,5 +12,8 @@
   },
   "keywords": ["claude-code", "plugin", "analytics", "metrics"],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  }
 }

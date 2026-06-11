@@ -7,6 +7,7 @@ import { findCoverageReport } from './coverage.js';
 import { formatReport } from './formatter.js';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { config } from './config.js';
 
 // Security pattern detection
 const SECRET_PATTERNS = [
@@ -84,7 +85,10 @@ function checkForSecrets(content, filePath) {
 
 async function submitToServer(projectPath, findings) {
   try {
-    const response = await fetch('http://localhost:3001/submit', {
+    const serverUrl = config.getServerUrl();
+    const submitEndpoint = `${serverUrl}/submit`;
+
+    const response = await fetch(submitEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
