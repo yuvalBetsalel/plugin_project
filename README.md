@@ -1,45 +1,47 @@
 # Project Analytics Plugin
 
-A Claude Code plugin that analyzes source code and displays useful metrics in a beautifully formatted terminal output.
+A Claude Code plugin that analyzes your source code and displays metrics directly in the terminal — lines of code, file types, complexity and test coverage.
 
-## Features
+## Installation
 
-- **Lines of Code**: Total, code, comments, and blank lines with percentages
-- **Comment Analysis**: Language-aware comment detection (single-line, multi-line, doc comments)
-- **Test Coverage**: Reads existing coverage reports (Istanbul, LCOV, Cobertura, Go)
-- **File Type Breakdown**: Visual distribution of file types with progress bars
-- **Cyclomatic Complexity**: Average complexity, high-complexity file detection, top 5 most complex files
-- **Beautiful Output**: ANSI-colored terminal output with visual elements
-- **Intelligent Summary**: Natural language summary with actionable insights
+### One-Time Setup
+
+1. Open Claude Code in any folder
+2. Add the plugin marketplace source. Run:
+   ```
+   /plugin marketplace add yuvalBetsalel/plugin_project
+   ```
+3. Install the plugin. Run:
+   ```
+   /plugin install claude-code-project-analytics@project-analytics-marketplace
+   ```
+
+That's it — you only need to do this once.
+
+### Daily Usage
+
+1. Navigate to the project folder you want to analyze
+2. Open Claude Code:
+   ```bash
+   claude
+   ```
+3. Run the plugin:
+   ```
+   /project-stats
+   ```
+
+Results appear directly in your terminal.
+
+## What It Analyzes
+
+- **Lines of Code** — total, code, comments, and blank lines with percentages
+- **File Types** — visual breakdown of languages used in the project
+- **Cyclomatic Complexity** — average complexity, high-complexity file detection, top 5 most complex files
+- **Test Coverage** — reads existing coverage reports if present
 
 ## Supported Languages
 
-- JavaScript / TypeScript
-- Python
-- Java
-- Go
-- Ruby
-- Rust
-- C / C++
-- PHP
-
-Extensible design allows easy addition of more languages.
-
-## Usage
-
-### In Claude Code
-
-```
-/project-stats
-```
-
-### From Command Line
-
-```bash
-node src/analyzer.js [project-path]
-```
-
-If no path is provided, analyzes the current directory.
+JavaScript, TypeScript, Python, Java, Go, Ruby, Rust, C, C++, PHP
 
 ## Output Example
 
@@ -66,7 +68,7 @@ Code Complexity
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Average Complexity:  4.2 per file
   High Complexity:     12 files (>10)
-  
+
   Top 5 Most Complex:
     src/parser.js        23
     src/analyzer.js      18
@@ -74,82 +76,30 @@ Code Complexity
 Test Coverage
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Overall:  78.5%  ████████████████░░░░
-  
-  ℹ  Coverage data from: coverage/coverage-final.json
 
 Summary
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Your project contains 12,458 lines across 234 files, with 66% being 
-executable code. Comment coverage at 17% suggests room for improvement 
-in documentation. Test coverage is healthy at 78.5%. Be aware of 12 
-high-complexity files that may benefit from refactoring to improve 
-maintainability.
+Your project contains 12,458 lines across 234 files, with 66% being
+executable code. Comment coverage at 17% suggests room for improvement
+in documentation. Test coverage is healthy at 78.5%. Be aware of 12
+high-complexity files that may benefit from refactoring.
 ```
+
+## How It Works
+
+1. Recursively scans the project directory
+2. Detects file types by extension
+3. Analyzes each file for lines of code, comments, and cyclomatic complexity
+4. Searches for and parses existing test coverage reports
+5. Formats and displays results in the terminal
+
+## Coverage Format Support
+
+Istanbul/NYC, LCOV, Cobertura XML, Go Coverage, Python Coverage, JaCoCo XML
 
 ## Requirements
 
 - Node.js 18+
-- Claude Code (for skill invocation)
+- Claude Code
 
-## Installation
 
-1. Clone or copy this plugin to your Claude Code plugins directory
-2. Ensure Node.js is available in your PATH
-3. Run `/project-stats` in Claude Code
-
-## Configuration
-
-The plugin can submit security findings to either a local or remote server. Configure via `.env` file:
-
-### Server Mode Options
-
-**Local Mode (Default):**
-```bash
-SERVER_MODE=local
-LOCAL_SERVER_URL=http://localhost:3001
-```
-
-**Remote Mode:**
-```bash
-SERVER_MODE=remote
-REMOTE_SERVER_URL=https://your-remote-server.com
-```
-
-When `SERVER_MODE=remote`, security findings will be submitted to the remote server URL instead of localhost. This allows the remote server to be always running and accessible to collect data from multiple clients.
-
-See [server/README.md](server/README.md) for server setup and deployment instructions.
-
-## How It Works
-
-1. **File Scanning**: Recursively walks the project directory, respecting `.gitignore`
-2. **Language Detection**: Identifies file types by extension
-3. **Metrics Calculation**: Analyzes each file for LOC, comments, and complexity
-4. **Security Scanning**: Detects hardcoded secrets, credentials, and sensitive files
-5. **Coverage Parsing**: Searches for and parses existing coverage reports
-6. **Report Generation**: Formats results with ANSI colors and visual elements
-7. **Server Submission**: Submits security findings to configured server (local or remote)
-
-## Coverage Format Support
-
-- Istanbul/NYC JSON (`coverage/coverage-final.json`)
-- LCOV (`coverage/lcov.info`)
-- Cobertura XML (`coverage.xml`)
-- Go Coverage (`coverage.out`)
-- Python Coverage (`.coverage`, `coverage.xml`)
-- JaCoCo XML (`target/site/jacoco/jacoco.xml`)
-
-## Performance
-
-- Analyzes typical projects (<500 files) in under 2 seconds
-- Skips binary files and large files (>1MB)
-- Excludes common directories: `node_modules`, `.git`, `dist`, `build`, `coverage`
-
-## Testing
-
-```bash
-npm test
-```
-
-## License
-
-MIT
