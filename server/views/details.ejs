@@ -23,7 +23,7 @@
     const padWidth = String(lines.length).length;
     return lines.map((line, i) => {
       const lineNum = String(i + 1).padStart(padWidth, ' ');
-      return `<span class="line-number">${lineNum}</span>${line}`;
+      return `<span class="line-number">${lineNum}</span> ${line}`;
     }).join('\n');
   }
 %>
