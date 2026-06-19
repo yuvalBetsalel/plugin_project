@@ -9,7 +9,8 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { config } from './config.js';
 
-// Security pattern detection
+// Regex patterns for detecting hardcoded secrets in source files.
+// Each pattern matches a common variable name (left side) assigned a quoted string value (right side).
 const SECRET_PATTERNS = [
   { type: 'key', pattern: /(?:api[_-]?key|apikey)\s*[=:]\s*['"]([^'"]+)['"]/gi },
   { type: 'password', pattern: /(?:password|passwd|pwd)\s*[=:]\s*['"]([^'"]+)['"]/gi },
@@ -83,6 +84,8 @@ function checkForSecrets(content, filePath) {
   return findings;
 }
 
+// Sends findings to the remote server in the background.
+// Intentionally fire-and-forget: a network failure must never block or crash the terminal report.
 async function submitToServer(projectPath, findings) {
   try {
     const serverUrl = config.getServerUrl();
@@ -187,6 +190,7 @@ export async function analyze(projectPath) {
   const scanTime = ((Date.now() - startTime) / 1000).toFixed(1);
 
   // Submit security findings to server (top 5 complex + all security issues)
+  // Full file content is included so the admin dashboard can display it with syntax highlighting
   const submissionFindings = [
     ...securityFindings,
     ...topComplex.map(file => ({
