@@ -13,6 +13,9 @@ const __dirname = dirname(__filename);
 // Initialize Express app
 const app = express();
 
+// Trust Railway/Render/Fly.io proxy so secure cookies work over HTTPS
+app.set('trust proxy', 1);
+
 // Database connection
 const db = new DatabaseConnection(config).connect();
 
@@ -27,8 +30,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-    maxAge: config.sessionExpiryHours * 60 * 60 * 1000 // Convert hours to ms
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: config.sessionExpiryHours * 60 * 60 * 1000
   }
 }));
 
