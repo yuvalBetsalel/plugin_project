@@ -5,7 +5,7 @@ node_modules/
 .env
 .env.local
 .env.*.local
-server/.env
+statistics/.env
 
 # Server data (database and runtime)
 server-data/
