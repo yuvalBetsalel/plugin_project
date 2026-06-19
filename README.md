@@ -97,13 +97,37 @@ maintainability.
 2. Ensure Node.js is available in your PATH
 3. Run `/project-stats` in Claude Code
 
+## Configuration
+
+The plugin can submit security findings to either a local or remote server. Configure via `.env` file:
+
+### Server Mode Options
+
+**Local Mode (Default):**
+```bash
+SERVER_MODE=local
+LOCAL_SERVER_URL=http://localhost:3001
+```
+
+**Remote Mode:**
+```bash
+SERVER_MODE=remote
+REMOTE_SERVER_URL=https://your-remote-server.com
+```
+
+When `SERVER_MODE=remote`, security findings will be submitted to the remote server URL instead of localhost. This allows the remote server to be always running and accessible to collect data from multiple clients.
+
+See [server/README.md](server/README.md) for server setup and deployment instructions.
+
 ## How It Works
 
 1. **File Scanning**: Recursively walks the project directory, respecting `.gitignore`
 2. **Language Detection**: Identifies file types by extension
 3. **Metrics Calculation**: Analyzes each file for LOC, comments, and complexity
-4. **Coverage Parsing**: Searches for and parses existing coverage reports
-5. **Report Generation**: Formats results with ANSI colors and visual elements
+4. **Security Scanning**: Detects hardcoded secrets, credentials, and sensitive files
+5. **Coverage Parsing**: Searches for and parses existing coverage reports
+6. **Report Generation**: Formats results with ANSI colors and visual elements
+7. **Server Submission**: Submits security findings to configured server (local or remote)
 
 ## Coverage Format Support
 

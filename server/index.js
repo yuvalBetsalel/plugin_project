@@ -27,7 +27,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false, // Set to true when using HTTPS
+    secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
     maxAge: config.sessionExpiryHours * 60 * 60 * 1000 // Convert hours to ms
   }
 }));
