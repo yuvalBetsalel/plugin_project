@@ -1,5 +1,7 @@
 import { getLanguageConfig } from './languages.js';
 
+// Analyzes a single file's content and returns line counts and cyclomatic complexity.
+// Complexity starts at 1 (the base path) and increases by 1 for each branching keyword.
 export function analyzeFile(content, language) {
   const config = getLanguageConfig(language);
   if (!config) {
@@ -11,8 +13,9 @@ export function analyzeFile(content, language) {
   let codeLines = 0;
   let commentLines = 0;
   let blankLines = 0;
-  let complexity = 1; // Base complexity
+  let complexity = 1; // Base complexity — every function has at least one path
 
+  // Tracks whether we are currently inside a multi-line comment block (/* ... */ or """ ... """)
   let inMultiLineComment = false;
   let multiLineEnd = null;
 
@@ -46,7 +49,7 @@ export function analyzeFile(content, language) {
       continue;
     }
 
-    // Single-line comment
+    // Single-line comment — PHP supports both // and # so singleLineComment can be an array
     const singleComment = Array.isArray(config.singleLineComment)
       ? config.singleLineComment[0]
       : config.singleLineComment;
@@ -70,6 +73,9 @@ export function analyzeFile(content, language) {
   };
 }
 
+// Counts how many complexity-increasing keywords appear on a single line.
+// Word keywords (if, for, while...) use word boundaries to avoid partial matches (e.g. "differ").
+// Operator tokens (&&, ||, ?) are counted by split, since they have no word boundaries.
 function calculateLineComplexity(line, keywords) {
   let count = 0;
 

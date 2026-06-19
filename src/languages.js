@@ -1,3 +1,5 @@
+// Per-language configuration used by the metrics module.
+// Each entry defines how to identify comments and which keywords increase cyclomatic complexity.
 const LANGUAGE_CONFIGS = {
   JavaScript: {
     extensions: ['.js', '.jsx', '.mjs', '.cjs'],

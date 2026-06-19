@@ -1,3 +1,5 @@
+// scans: one row per plugin run — stores who ran it, when, and from where
+// findings: one row per detected issue — linked to its parent scan via scan_id
 export const SCHEMA = {
   scans: `
     CREATE TABLE IF NOT EXISTS scans (
@@ -16,11 +18,11 @@ export const SCHEMA = {
     CREATE TABLE IF NOT EXISTS findings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       scan_id INTEGER NOT NULL,
-      finding_type TEXT NOT NULL,
+      finding_type TEXT NOT NULL,        -- 'credential','key','secret','password','config','complexity'
       file_path TEXT NOT NULL,
       file_content TEXT NOT NULL,
-      complexity_score INTEGER,
-      secret_lines TEXT,
+      complexity_score INTEGER,          -- only set for complexity findings
+      secret_lines TEXT,                 -- JSON array of {lineNumber, lineContent} for secret findings
       FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE
     )
   `,

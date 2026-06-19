@@ -1,15 +1,18 @@
 import { readFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 
+// Known locations where test coverage reports are typically written by common tools
 const COVERAGE_LOCATIONS = [
-  'coverage/coverage-final.json',
-  'coverage/lcov.info',
-  '.coverage',
-  'coverage.xml',
-  'coverage.out',
-  'target/site/jacoco/jacoco.xml'
+  'coverage/coverage-final.json',  // Istanbul / NYC (JavaScript)
+  'coverage/lcov.info',            // LCOV (many languages)
+  '.coverage',                     // Python coverage
+  'coverage.xml',                  // Cobertura XML (Java, Python)
+  'coverage.out',                  // Go coverage
+  'target/site/jacoco/jacoco.xml'  // JaCoCo (Java/Maven)
 ];
 
+// Tries each known coverage file path in order and returns the first one found and parsed.
+// Returns null if no coverage report exists in the project.
 export async function findCoverageReport(rootPath) {
   for (const location of COVERAGE_LOCATIONS) {
     const fullPath = join(rootPath, location);
@@ -80,6 +83,7 @@ function parseLcov(content) {
   let linesFound = 0;
   let linesHit = 0;
 
+  // LF = Lines Found (total instrumented lines), LH = Lines Hit (covered lines)
   for (const line of lines) {
     if (line.startsWith('LF:')) {
       linesFound = parseInt(line.substring(3));
@@ -114,6 +118,8 @@ function parseCoberturaXml(content) {
 }
 
 function parseGoCoverage(content) {
+  // Each line is: "pkg/file.go:startLine.col,endLine.col numStatements isCovered"
+  // The last field is 0 (not covered) or >0 (covered)
   const lines = content.split('\n').filter(l => l && !l.startsWith('mode:'));
 
   if (lines.length === 0) return null;

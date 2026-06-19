@@ -1,6 +1,7 @@
 import { readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
+// Folders that are never meaningful to scan — generated output, dependencies, version control
 const DEFAULT_EXCLUDES = [
   'node_modules',
   'vendor',
@@ -18,6 +19,7 @@ const DEFAULT_EXCLUDES = [
   'AppData'
 ];
 
+// File extensions that contain no readable source code
 const BINARY_EXTENSIONS = [
   '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
   '.mp4', '.mp3', '.wav', '.avi',
@@ -27,6 +29,7 @@ const BINARY_EXTENSIONS = [
   '.woff', '.woff2', '.ttf', '.eot'
 ];
 
+// Recursively walks rootPath and returns absolute paths of all scannable files
 export async function scanDirectory(rootPath) {
   const absoluteRoot = resolve(rootPath);
   const files = [];
@@ -36,6 +39,7 @@ export async function scanDirectory(rootPath) {
 
     for (const entry of entries) {
       const fullPath = join(dir, entry.name);
+      // Use relative path for exclusion checks so folder names match anywhere in the tree
       const relativePath = fullPath.substring(absoluteRoot.length + 1);
 
       // Skip default excludes
