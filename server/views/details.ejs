@@ -16,6 +16,16 @@
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + '\n\n... [Content truncated - file too large for display]';
   }
+
+  // Helper to add line numbers to code content
+  function addLineNumbers(content) {
+    const lines = truncateContent(content).split('\n');
+    const padWidth = String(lines.length).length;
+    return lines.map((line, i) => {
+      const lineNum = String(i + 1).padStart(padWidth, ' ');
+      return `<span class="line-number">${lineNum}</span>${line}`;
+    }).join('\n');
+  }
 %>
 
 <div style="margin-bottom: 20px;">
@@ -75,7 +85,7 @@
         <% } %>
 
         <div style="position: relative;">
-          <pre style="margin: 0; max-height: 400px; overflow-y: auto;" class="<%= getLanguageClass(finding.file_path) %>"><code><%- truncateContent(finding.file_content) %></code></pre>
+          <pre style="margin: 0; max-height: 400px; overflow-y: auto;" class="<%= getLanguageClass(finding.file_path) %>"><code><%- addLineNumbers(finding.file_content) %></code></pre>
         </div>
       </div>
     <% }); %>
@@ -94,7 +104,7 @@
           <span style="float: right; color: #666;"><code><%= finding.file_path %></code></span>
         </div>
         <div style="position: relative;">
-          <pre style="margin: 0; max-height: 400px; overflow-y: auto;" class="<%= getLanguageClass(finding.file_path) %>"><code><%- truncateContent(finding.file_content) %></code></pre>
+          <pre style="margin: 0; max-height: 400px; overflow-y: auto;" class="<%= getLanguageClass(finding.file_path) %>"><code><%- addLineNumbers(finding.file_content) %></code></pre>
         </div>
       </div>
     <% }); %>
@@ -105,6 +115,18 @@
 <!-- Include highlight.js for syntax highlighting -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  pre code .line-number {
+    display: inline-block;
+    min-width: 3em;
+    padding-right: 1em;
+    color: #999;
+    border-right: 1px solid #ddd;
+    margin-right: 1em;
+    user-select: none;
+    text-align: right;
+  }
+</style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('pre code').forEach((block) => {
