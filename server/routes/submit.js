@@ -40,8 +40,12 @@ export function createSubmitRouter(db) {
         }
       }
 
-      // Get client IP and User Agent
-      let clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      // Get client IP — x-forwarded-for contains a comma-separated list of IPs
+      // added by each proxy in order; the first one is the original client IP
+      const forwarded = req.headers['x-forwarded-for'];
+      let clientIp = forwarded
+        ? forwarded.split(',')[0].trim()
+        : req.socket.remoteAddress;
 
       // Clean up IPv4-mapped IPv6 addresses (::ffff:127.0.0.1 -> 127.0.0.1)
       if (clientIp && clientIp.startsWith('::ffff:')) {
