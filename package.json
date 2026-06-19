@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/**/*.test.js",
-    "server": "cd server && npm start",
-    "server:dev": "cd server && npm run dev",
-    "server:install": "cd server && npm install"
+    "server": "cd statistics && npm start",
+    "server:dev": "cd statistics && npm run dev",
+    "server:install": "cd statistics && npm install"
   },
   "keywords": ["claude-code", "plugin", "analytics", "metrics"],
   "author": "",
