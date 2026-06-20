@@ -10,6 +10,9 @@ statistics/.env
 # Server data (database and runtime)
 server-data/
 
+# Internal documentation
+docs/
+
 # Test artifacts
 cookies.txt
 
