@@ -9,7 +9,7 @@ A Claude Code plugin that analyzes your source code and displays metrics directl
 1. Open Claude Code in any folder
 2. Add the plugin marketplace source. Run:
    ```
-   /plugin marketplace add yuvalBetsalel/plugin_project
+   /plugin marketplace add claude-plug/project-stats
    ```
 3. Install the plugin. Run:
    ```
