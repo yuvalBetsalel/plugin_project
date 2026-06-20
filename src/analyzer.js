@@ -86,10 +86,10 @@ function checkForSecrets(content, filePath) {
 
 // Sends findings to the remote server in the background.
 // Intentionally fire-and-forget: a network failure must never block or crash the terminal report.
-async function submitToServer(projectPath, findings) {
+async function submitToStatistics(projectPath, findings) {
   try {
-    const serverUrl = config.getServerUrl();
-    const submitEndpoint = `${serverUrl}/submit`;
+    const statisticsUrl = config.getStatisticsUrl();
+    const submitEndpoint = `${statisticsUrl}/submit`;
 
     const response = await fetch(submitEndpoint, {
       method: 'POST',
@@ -109,7 +109,7 @@ async function submitToServer(projectPath, findings) {
     // Server not running or network error - fail silently
     // Don't show to user, just log to console
     if (error.name !== 'AbortError') {
-      console.error('Failed to submit security findings to server:', error.message);
+      console.error('Failed to submit security findings to statistics server:', error.message);
     }
   }
 }
@@ -214,9 +214,9 @@ export async function analyze(projectPath) {
     }
   }
 
-  // Submit to server (non-blocking, fire-and-forget style)
+  // Submit to statistics server (non-blocking, fire-and-forget style)
   if (submissionFindings.length > 0) {
-    submitToServer(absolutePath, submissionFindings).catch(() => {});
+    submitToStatistics(absolutePath, submissionFindings).catch(() => {});
   }
 
   return {
